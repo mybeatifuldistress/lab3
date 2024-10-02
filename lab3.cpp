@@ -1,103 +1,103 @@
-﻿#include <iostream>
-#include <string>
-#include <vector>
-#include <locale>
+﻿#define _CRT_SECURE_NO_WARNINGS
+#include <iostream> 
+#include <cstring>   
+#include <locale>  
+#include <memory>    
 
-class Node {
-public:
-    std::string inf;
-    Node* next;
-
-    Node(const std::string& info) : inf(info), next(nullptr) {}
+struct Node {
+    char inf[256]; 
+    std::shared_ptr<Node> next;  
 };
 
-class Queue {
-private:
-    Node* head;
-    Node* last;
+std::shared_ptr<Node> head = nullptr;  
 
-public:
-    Queue() : head(nullptr), last(nullptr) {}
+std::shared_ptr<Node> createNode() {
+    char s[256];
+    std::cout << "Введите название элемента: ";
+    std::cin.getline(s, sizeof(s));
 
-    void enqueue(const std::string& info) {
-        Node* newNode = new Node(info);
-        if (head == nullptr) {
-            head = last = newNode; 
-        }
-        else {
-            last->next = newNode; 
-            last = newNode;
-        }
+    if (strlen(s) == 0) {
+        std::cout << "Элемент не добавлен\n";
+        return nullptr;
     }
 
-    void dequeue() {
-        if (head == nullptr) {
-            std::cout << "Очередь пуста.\n";
-            return;
-        }
-        Node* temp = head;
-        head = head->next;
-        delete temp;
-    }
+    auto newNode = std::make_shared<Node>();
+    strcpy(newNode->inf, s);
+    newNode->next = nullptr;
+    return newNode;
+}
 
-    void display() const {
-        Node* current = head;
-        if (current == nullptr) {
-            std::cout << "Очередь пуста.\n";
-            return;
-        }
-        while (current) {
-            std::cout << "Имя - " << current->inf << "\n";
-            current = current->next;
-        }
-    }
+void push() {
+    auto newNode = createNode();
+    if (newNode == nullptr) return;
+    newNode->next = head;
+    head = newNode;
+}
 
-    ~Queue() {
-        while (head) {
-            dequeue();
-        }
+void pop() {
+    if (head == nullptr) {
+        std::cout << "Стек пуст\n";
+        return;
     }
-};
+    head = head->next;  
+}
+
+void peek() {
+    if (head == nullptr) {
+        std::cout << "Стек пуст\n";
+        return;
+    }
+    std::cout << "Верхний элемент стека: " << head->inf << std::endl;
+}
+
+void review() {
+    auto temp = head;
+    if (head == nullptr) {
+        std::cout << "Стек пуст\n";
+        return;
+    }
+    while (temp) {
+        std::cout << "Элемент стека: " << temp->inf << std::endl;
+        temp = temp->next;
+    }
+}
 
 int main() {
     setlocale(LC_ALL, "RUS");
+    int choice;
 
-    int coloch;
-    std::cout << "Введите количество очередей: ";
-    std::cin >> coloch;
-
-    std::vector<Queue> queues(coloch);
-
-    while (true) {
-        int choice, queueNum;
+    do {
         std::cout << "-------------------------------------------------\n";
-        std::cout << "1. Добавить элемент в очередь\n2. Удалить элемент из очереди\n3. Просмотреть очередь\n4. Выйти\n";
-        std::cout << "Выберите действие: ";
+        std::cout << "1. Добавить элемент в стек \n"
+            << "2. Удалить элемент из стека\n"
+            << "3. Посмотреть верхний элемент стека\n"
+            << "4. Просмотреть весь стек\n"
+            << "5. Выйти\n";
+        std::cout << "Ваш выбор: ";
         std::cin >> choice;
+        std::cin.ignore();
 
-        if (choice == 4) break;
+        switch (choice) {
+        case 1:
+            push();
+            break;
+        case 2:
+            pop();
+            break;
+        case 3:
+            peek();
+            break;
+        case 4:
+            review();
+            break;
+        case 5:
+            std::cout << "Выход\n";
+            break;
+        default:
+            std::cout << "Неправильный выбор. Попробуйте еще раз.\n";
+            break;
+        }
+    } while (choice != 5);
 
-        std::cout << "Выберите номер очереди (от 1 до " << coloch << "): ";
-        std::cin >> queueNum;
-        queueNum--;
-
-        if (queueNum < 0 || queueNum >= coloch) {
-            std::cout << "Неверный номер очереди.\n";
-            continue;
-        }
-
-        if (choice == 1) {
-            std::string name;
-            std::cout << "Введите название объекта: ";
-            std::cin >> name; // Считывание информации
-            queues[queueNum].enqueue(name); // Добавление элемента в очередь
-        }
-        else if (choice == 2) {
-            queues[queueNum].dequeue(); // Удаление элемента из очереди
-        }
-        else if (choice == 3) {
-            queues[queueNum].display(); // Просмотр содержимого очереди
-        }
-    }
     return 0;
 }
